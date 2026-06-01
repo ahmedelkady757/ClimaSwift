@@ -14,15 +14,15 @@ protocol NetworkClientProtocol {
 
 class NetworkClient: NetworkClientProtocol {
     static let shared = NetworkClient()
-    
+
     private let session: Session
-    
+
     private init() {
         let configuration = URLSessionConfiguration.af.default
         configuration.timeoutIntervalForRequest = 30
         session = Session(configuration: configuration)
     }
-    
+
     func request<T: Decodable>(_ route: URLRequestConvertible) async throws -> T {
         return try await session.request(route)
             .serializingDecodable(T.self)
@@ -32,22 +32,22 @@ class NetworkClient: NetworkClientProtocol {
 
 enum WeatherEndpoint: URLRequestConvertible {
     case forecast(lat: Double, lon: Double, days: Int, apiKey: String)
-    
+
     var baseURL: URL {
-        return URL(string: "http://api.weatherapi.com/v1")!
+        return URL(string: "https://api.weatherapi.com/v1")!
     }
-    
+
     var path: String {
         switch self {
         case .forecast:
             return "/forecast.json"
         }
     }
-    
+
     var method: HTTPMethod {
         return .get
     }
-    
+
     var parameters: Parameters {
         switch self {
         case let .forecast(lat, lon, days, apiKey):
@@ -60,12 +60,11 @@ enum WeatherEndpoint: URLRequestConvertible {
             ]
         }
     }
-    
+
     func asURLRequest() throws -> URLRequest {
         let url = baseURL.appendingPathComponent(path)
         var request = URLRequest(url: url)
         request.method = method
-        
         return try URLEncoding.default.encode(request, with: parameters)
     }
 }

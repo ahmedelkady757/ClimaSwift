@@ -5,6 +5,7 @@
 //  Created by JETSMobileLabMini6 on 01/06/2026.
 //
 
+
 import Foundation
 
 enum WeatherLoadingState {
@@ -14,7 +15,6 @@ enum WeatherLoadingState {
     case failure(String)
 }
 
-@MainActor
 class DashboardViewModel: ObservableObject {
     @Published var loadingState: WeatherLoadingState = .idle
 
@@ -24,6 +24,7 @@ class DashboardViewModel: ObservableObject {
         self.getCurrentWeatherUseCase = getCurrentWeatherUseCase
     }
 
+    @MainActor
     func fetchWeather(lat: Double, lon: Double) async {
         loadingState = .loading
         do {
