@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		BECF278D2FCDD95A004980A1 /* Swinject in Frameworks */ = {isa = PBXBuildFile; productRef = BECF278C2FCDD95A004980A1 /* Swinject */; };
 		BECF27902FCDD96B004980A1 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = BECF278F2FCDD96B004980A1 /* Alamofire */; };
+		BECF27CE2FCDDAE1004980A1 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = BECF27CD2FCDDAE1004980A1 /* SDWebImageSwiftUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +58,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BECF27CE2FCDDAE1004980A1 /* SDWebImageSwiftUI in Frameworks */,
 				BECF278D2FCDD95A004980A1 /* Swinject in Frameworks */,
 				BECF27902FCDD96B004980A1 /* Alamofire in Frameworks */,
 			);
@@ -121,6 +123,7 @@
 			packageProductDependencies = (
 				BECF278C2FCDD95A004980A1 /* Swinject */,
 				BECF278F2FCDD96B004980A1 /* Alamofire */,
+				BECF27CD2FCDDAE1004980A1 /* SDWebImageSwiftUI */,
 			);
 			productName = ClimaSwift;
 			productReference = BECF274E2FCDC905004980A1 /* ClimaSwift.app */;
@@ -207,6 +210,7 @@
 			packageReferences = (
 				BECF278B2FCDD95A004980A1 /* XCRemoteSwiftPackageReference "Swinject" */,
 				BECF278E2FCDD96B004980A1 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				BECF27CC2FCDDAE1004980A1 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = BECF274F2FCDC905004980A1 /* Products */;
@@ -581,6 +585,14 @@
 				minimumVersion = 5.12.0;
 			};
 		};
+		BECF27CC2FCDDAE1004980A1 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.4;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -593,6 +605,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = BECF278E2FCDD96B004980A1 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
+		};
+		BECF27CD2FCDDAE1004980A1 /* SDWebImageSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BECF27CC2FCDDAE1004980A1 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
+			productName = SDWebImageSwiftUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
