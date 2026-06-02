@@ -7,18 +7,9 @@
 
 import SwiftUI
 
-enum ThemeType {
+enum ThemeType: Equatable {
     case morning
     case evening
-    
-    var backgroundColor: Color {
-        switch self {
-        case .morning:
-            return Color.blue.opacity(0.3) // Placeholder for actual background image logic
-        case .evening:
-            return Color.black.opacity(0.8)
-        }
-    }
     
     var foregroundColor: Color {
         switch self {
@@ -26,15 +17,6 @@ enum ThemeType {
             return .black
         case .evening:
             return .white
-        }
-    }
-    
-    var backgroundImageName: String {
-        switch self {
-        case .morning:
-            return "bg_morning"
-        case .evening:
-            return "bg_evening"
         }
     }
 }

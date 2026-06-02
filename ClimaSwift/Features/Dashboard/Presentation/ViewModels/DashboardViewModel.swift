@@ -18,28 +18,23 @@ class DashboardViewModel: ObservableObject {
     @Published var loadingState: WeatherLoadingState = .idle
     @Published var forecast: [ForecastDayModel] = []
 
-    private let getCurrentWeatherUseCase: GetCurrentWeatherUseCaseProtocol
-    private let getForecastUseCase: GetForecastUseCaseProtocol
+    private let getWeatherDashboardDataUseCase: GetWeatherDashboardDataUseCaseProtocol
 
-    init(
-        getCurrentWeatherUseCase: GetCurrentWeatherUseCaseProtocol,
-        getForecastUseCase: GetForecastUseCaseProtocol
-    ) {
-        self.getCurrentWeatherUseCase = getCurrentWeatherUseCase
-        self.getForecastUseCase = getForecastUseCase
+    init(getWeatherDashboardDataUseCase: GetWeatherDashboardDataUseCaseProtocol) {
+        self.getWeatherDashboardDataUseCase = getWeatherDashboardDataUseCase
     }
 
     @MainActor
     func fetchWeather(lat: Double, lon: Double) async {
         loadingState = .loading
         do {
-            async let weather = getCurrentWeatherUseCase.execute(lat: lat, lon: lon)
-            async let forecastDays = getForecastUseCase.execute(lat: lat, lon: lon)
-            let (fetchedWeather, fetchedForecast) = try await (weather, forecastDays)
-            forecast = fetchedForecast
-            loadingState = .success(fetchedWeather)
+            let weather = try await getWeatherDashboardDataUseCase.execute(lat: lat, lon: lon)
+            self.forecast = weather.forecast
+            self.loadingState = .success(weather)
+        } catch let error as AppError {
+            self.loadingState = .failure(error.errorDescription ?? "An error occurred.")
         } catch {
-            loadingState = .failure(error.localizedDescription)
+            self.loadingState = .failure(error.localizedDescription)
         }
     }
 }

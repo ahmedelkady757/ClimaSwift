@@ -9,23 +9,21 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct DashboardView: View {
-    @StateObject private var themeEngine = DynamicThemeEngine()
-    @StateObject private var viewModel = DashboardViewModel(
-        getCurrentWeatherUseCase: GetCurrentWeatherUseCase(
-            repository: WeatherRepositoryImpl()
-        ),
-        getForecastUseCase: GetForecastUseCase(
-            repository: WeatherRepositoryImpl()
-        )
-    )
+    @StateObject private var themeEngine: DynamicThemeEngine
+    @StateObject private var viewModel: DashboardViewModel
 
     private let defaultLat: Double = 30.0444
     private let defaultLon: Double = 31.2357
 
+    init() {
+        let container = DependencyContainer.shared.container
+        _themeEngine = StateObject(wrappedValue: container.resolve(DynamicThemeEngine.self)!)
+        _viewModel = StateObject(wrappedValue: container.resolve(DashboardViewModel.self)!)
+    }
+
     var body: some View {
         ZStack {
-            themeEngine.currentTheme.backgroundColor
-                .ignoresSafeArea()
+            AnimatedBackgroundView(theme: themeEngine.currentTheme)
 
             switch viewModel.loadingState {
             case .idle, .loading:
@@ -153,14 +151,20 @@ private struct ForecastRowView: View {
         formatter.dateFormat = "yyyy-MM-dd"
         guard let date = formatter.date(from: day.date) else { return day.date }
         let calendar = Calendar.current
-        if calendar.isDateInToday(date) { return "Today" }
-        if calendar.isDateInTomorrow(date) { return "Tomorrow" }
-        formatter.dateFormat = "EEEE"
-        return formatter.string(from: date)
+        
+        if calendar.isDateInToday(date) {
+            return "Today"
+        } else if calendar.isDateInTomorrow(date) {
+            return "Tomorrow"
+        } else {
+            let dayFormatter = DateFormatter()
+            dayFormatter.dateFormat = "EEEE" // Full day name (e.g., Wednesday)
+            return dayFormatter.string(from: date)
+        }
     }
 }
 
-struct MetricTile: View {
+private struct MetricTile: View {
     let title: String
     let value: String
     let theme: ThemeType
@@ -170,17 +174,16 @@ struct MetricTile: View {
             Text(title)
                 .font(.caption2)
                 .fontWeight(.bold)
+                .foregroundColor(theme.foregroundColor.opacity(0.6))
+
             Text(value)
                 .font(.title2)
+                .fontWeight(.semibold)
+                .foregroundColor(theme.foregroundColor)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
         .background(Color.white.opacity(0.1))
         .cornerRadius(12)
-        .foregroundColor(theme.foregroundColor)
     }
-}
-
-#Preview {
-    DashboardView()
 }
