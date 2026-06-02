@@ -12,8 +12,9 @@ struct DashboardView: View {
     @StateObject private var themeEngine: DynamicThemeEngine
     @StateObject private var viewModel: DashboardViewModel
 
-    private let defaultLat: Double = 30.0444
-    private let defaultLon: Double = 31.2357
+    @State private var lat: Double = 30.0444
+    @State private var lon: Double = 31.2357
+    @State private var isShowingLocations = false
 
     init() {
         let container = DependencyContainer.shared.container
@@ -47,13 +48,29 @@ struct DashboardView: View {
                         weather: weather,
                         forecast: viewModel.forecast,
                         theme: themeEngine.currentTheme,
-                        lat: defaultLat,
-                        lon: defaultLon
+                        lat: lat,
+                        lon: lon
                     )
                 }
             }
-            .task {
-                await viewModel.fetchWeather(lat: defaultLat, lon: defaultLon)
+            .task(id: lat) {
+                await viewModel.fetchWeather(lat: lat, lon: lon)
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        isShowingLocations = true
+                    } label: {
+                        Image(systemName: "list.bullet")
+                            .foregroundColor(themeEngine.currentTheme.foregroundColor)
+                    }
+                }
+            }
+            .sheet(isPresented: $isShowingLocations) {
+                SavedLocationsView { selectedLat, selectedLon in
+                    lat = selectedLat
+                    lon = selectedLon
+                }
             }
         }
     }

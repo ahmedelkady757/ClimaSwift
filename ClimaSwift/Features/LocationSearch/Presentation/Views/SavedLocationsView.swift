@@ -4,8 +4,11 @@ struct SavedLocationsView: View {
     @StateObject private var viewModel: SavedLocationsViewModel
     @State private var isShowingSearch = false
     @Environment(\.dismiss) private var dismiss
+    
+    var onLocationSelected: ((Double, Double) -> Void)?
 
-    init() {
+    init(onLocationSelected: ((Double, Double) -> Void)? = nil) {
+        self.onLocationSelected = onLocationSelected
         let container = DependencyContainer.shared.container
         _viewModel = StateObject(wrappedValue: container.resolve(SavedLocationsViewModel.self)!)
     }
@@ -46,7 +49,7 @@ struct SavedLocationsView: View {
                         }
                         .contentShape(Rectangle())
                         .onTapGesture {
-                            // Routing to dashboard could happen via Environment or Coordinator pattern
+                            onLocationSelected?(location.latitude, location.longitude)
                             dismiss()
                         }
                     }
