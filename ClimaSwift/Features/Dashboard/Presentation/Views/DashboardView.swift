@@ -13,6 +13,9 @@ struct DashboardView: View {
     @StateObject private var viewModel = DashboardViewModel(
         getCurrentWeatherUseCase: GetCurrentWeatherUseCase(
             repository: WeatherRepositoryImpl()
+        ),
+        getForecastUseCase: GetForecastUseCase(
+            repository: WeatherRepositoryImpl()
         )
     )
 
@@ -41,7 +44,7 @@ struct DashboardView: View {
                 .foregroundColor(themeEngine.currentTheme.foregroundColor)
 
             case .success(let weather):
-                WeatherContentView(weather: weather, theme: themeEngine.currentTheme)
+                WeatherContentView(weather: weather, forecast: viewModel.forecast, theme: themeEngine.currentTheme)
             }
         }
         .task {
@@ -52,6 +55,7 @@ struct DashboardView: View {
 
 private struct WeatherContentView: View {
     let weather: WeatherDomainModel
+    let forecast: [ForecastDayModel]
     let theme: ThemeType
 
     var body: some View {
@@ -95,7 +99,7 @@ private struct WeatherContentView: View {
                 Divider()
                     .background(theme.foregroundColor.opacity(0.3))
 
-                ForEach(weather.forecast) { day in
+                ForEach(forecast) { day in
                     ForecastRowView(day: day, theme: theme)
                 }
             }

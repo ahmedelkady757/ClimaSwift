@@ -40,9 +40,16 @@ class DependencyContainer {
             )
         }.inObjectScope(.transient)
 
+        container.register(GetForecastUseCaseProtocol.self) { resolver in
+            GetForecastUseCase(
+                repository: resolver.resolve(WeatherRepositoryInterface.self)!
+            )
+        }.inObjectScope(.transient)
+
         container.register(DashboardViewModel.self) { resolver in
             DashboardViewModel(
-                getCurrentWeatherUseCase: resolver.resolve(GetCurrentWeatherUseCaseProtocol.self)!
+                getCurrentWeatherUseCase: resolver.resolve(GetCurrentWeatherUseCaseProtocol.self)!,
+                getForecastUseCase: resolver.resolve(GetForecastUseCaseProtocol.self)!
             )
         }.inObjectScope(.transient)
     }
