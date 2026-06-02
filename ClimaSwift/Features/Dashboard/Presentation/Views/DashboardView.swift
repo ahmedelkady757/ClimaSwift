@@ -38,7 +38,7 @@ struct DashboardView: View {
                                 .tag(location.id as UUID?)
                         }
                     }
-                    .tabViewStyle(.page(indexDisplayMode: .always))
+                    .tabViewStyle(.page(indexDisplayMode: .never))
                 }
             }
             .task {

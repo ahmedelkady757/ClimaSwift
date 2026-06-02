@@ -16,7 +16,7 @@ final class LocalLocationDataSource: LocalLocationDataSourceProtocol {
 
     @MainActor
     func getSavedLocations() async throws -> [LocationSwiftDataModel] {
-        let descriptor = FetchDescriptor<LocationSwiftDataModel>(sortBy: [SortDescriptor(\.addedAt, order: .reverse)])
+        let descriptor = FetchDescriptor<LocationSwiftDataModel>(sortBy: [SortDescriptor(\.addedAt, order: .forward)])
         return try modelContainer.mainContext.fetch(descriptor)
     }
 
