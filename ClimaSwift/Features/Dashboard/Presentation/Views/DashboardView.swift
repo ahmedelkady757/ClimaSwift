@@ -152,10 +152,11 @@ private struct ForecastRowView: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         guard let date = formatter.date(from: day.date) else { return day.date }
-        formatter.dateFormat = "EEE"
-        let label = formatter.string(from: date)
-        let todayString = formatter.string(from: Date())
-        return label == todayString ? "Today" : label
+        let calendar = Calendar.current
+        if calendar.isDateInToday(date) { return "Today" }
+        if calendar.isDateInTomorrow(date) { return "Tomorrow" }
+        formatter.dateFormat = "EEEE"
+        return formatter.string(from: date)
     }
 }
 
