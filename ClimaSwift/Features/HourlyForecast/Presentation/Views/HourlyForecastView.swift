@@ -63,7 +63,7 @@ struct HourlyForecastView: View {
         }
         .navigationTitle("Hourly Forecast")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarColorScheme(themeEngine.currentTheme == .night ? .dark : .light, for: .navigationBar)
+        .toolbarColorScheme(themeEngine.currentTheme == .evening ? .dark : .light, for: .navigationBar)
     }
 }
 
