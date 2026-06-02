@@ -1,42 +1,50 @@
 import SwiftUI
 
 struct SearchView: View {
-    @State private var searchText: String = ""
+    @StateObject private var viewModel: SearchViewModel
     @Environment(\.dismiss) private var dismiss
+
+    init() {
+        let container = DependencyContainer.shared.container
+        _viewModel = StateObject(wrappedValue: container.resolve(SearchViewModel.self)!)
+    }
 
     var body: some View {
         NavigationStack {
             List {
-                Section(header: Text("Search Results")) {
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text("London").font(.headline)
-                            Text("United Kingdom").font(.subheadline).foregroundColor(.secondary)
+                if viewModel.isLoading {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, alignment: .center)
+                } else if let errorMessage = viewModel.errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                } else {
+                    ForEach(viewModel.searchResults) { location in
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text(location.name).font(.headline)
+                                Text("\(location.region), \(location.country)").font(.subheadline).foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            if location.isSaved {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                            }
                         }
-                        Spacer()
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        dismiss()
-                    }
-                    
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text("New York").font(.headline)
-                            Text("United States of America").font(.subheadline).foregroundColor(.secondary)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            Task {
+                                await viewModel.saveLocation(location)
+                                dismiss()
+                            }
                         }
-                        Spacer()
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        dismiss()
                     }
                 }
             }
             .listStyle(.insetGrouped)
             .navigationTitle("Search Location")
             .navigationBarTitleDisplayMode(.inline)
-            .searchable(text: $searchText, prompt: "Search for a city...")
+            .searchable(text: $viewModel.searchQuery, prompt: "Search for a city...")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
@@ -46,8 +54,4 @@ struct SearchView: View {
             }
         }
     }
-}
-
-#Preview {
-    SearchView()
 }
