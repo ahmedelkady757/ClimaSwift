@@ -1,7 +1,6 @@
 import Foundation
 import Combine
 
-@MainActor
 final class SearchViewModel: ObservableObject {
     @Published var searchQuery = ""
     @Published var searchResults: [LocationDomainModel] = []
@@ -25,6 +24,7 @@ final class SearchViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
+    @MainActor
     func performSearch(query: String) async {
         guard !query.isEmpty else {
             searchResults = []
@@ -43,6 +43,7 @@ final class SearchViewModel: ObservableObject {
         isLoading = false
     }
     
+    @MainActor
     func saveLocation(_ location: LocationDomainModel) async {
         do {
             try await manageSavedUseCase.saveLocation(location)

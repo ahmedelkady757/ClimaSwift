@@ -1,6 +1,5 @@
 import Foundation
 
-@MainActor
 final class SavedLocationsViewModel: ObservableObject {
     @Published var savedLocations: [LocationDomainModel] = []
     @Published var isLoading = false
@@ -12,6 +11,7 @@ final class SavedLocationsViewModel: ObservableObject {
         self.manageSavedUseCase = manageSavedUseCase
     }
     
+    @MainActor
     func fetchSavedLocations() async {
         isLoading = true
         errorMessage = nil
@@ -23,6 +23,7 @@ final class SavedLocationsViewModel: ObservableObject {
         isLoading = false
     }
     
+    @MainActor
     func deleteLocation(byId id: UUID) async {
         do {
             try await manageSavedUseCase.deleteLocation(byId: id)
