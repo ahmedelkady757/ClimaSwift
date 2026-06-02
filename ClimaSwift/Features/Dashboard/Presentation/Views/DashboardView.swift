@@ -97,26 +97,22 @@ private struct WeatherContentView: View {
             Spacer()
 
             VStack(alignment: .leading, spacing: 12) {
-                NavigationLink(destination: HourlyForecastView()) {
-                    HStack {
-                        Text("3-DAY FORECAST")
-                            .font(.caption)
-                            .fontWeight(.bold)
-                        Spacer()
-                        Text("Hourly")
-                            .font(.caption)
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                    }
-                    .padding(.horizontal)
-                    .foregroundColor(theme.foregroundColor.opacity(0.7))
+                HStack {
+                    Text("3-DAY FORECAST")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                    Spacer()
                 }
+                .padding(.horizontal)
+                .foregroundColor(theme.foregroundColor.opacity(0.7))
 
                 Divider()
                     .background(theme.foregroundColor.opacity(0.3))
 
                 ForEach(forecast) { day in
-                    ForecastRowView(day: day, theme: theme)
+                    NavigationLink(destination: DailyForecastView(day: day, theme: theme)) {
+                        ForecastRowView(day: day, theme: theme)
+                    }
                 }
             }
             .padding()
