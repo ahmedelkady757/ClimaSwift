@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SavedLocationsView: View {
     @StateObject private var viewModel: SavedLocationsViewModel
+    @StateObject private var themeEngine: DynamicThemeEngine
     @State private var isShowingSearch = false
     @Environment(\.dismiss) private var dismiss
     
@@ -11,25 +12,13 @@ struct SavedLocationsView: View {
         self.onLocationSelected = onLocationSelected
         let container = DependencyContainer.shared.container
         _viewModel = StateObject(wrappedValue: container.resolve(SavedLocationsViewModel.self)!)
+        _themeEngine = StateObject(wrappedValue: container.resolve(DynamicThemeEngine.self)!)
     }
     
-    private var premiumBackground: some View {
-        LinearGradient(
-            colors: [
-                Color(red: 0.05, green: 0.05, blue: 0.15),
-                Color(red: 0.12, green: 0.18, blue: 0.35),
-                Color(red: 0.02, green: 0.05, blue: 0.1)
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        .ignoresSafeArea()
-    }
-
     var body: some View {
         NavigationStack {
             ZStack {
-                premiumBackground
+                AnimatedBackgroundView(theme: themeEngine.currentTheme)
                 
                 if viewModel.isLoading {
                     ProgressView()
