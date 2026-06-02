@@ -30,11 +30,11 @@ struct DashboardView: View {
                 AnimatedBackgroundView(theme: themeEngine.currentTheme)
 
                 if savedLocationsVM.savedLocations.isEmpty {
-                    DashboardPageView(lat: defaultLat, lon: defaultLon, theme: themeEngine.currentTheme)
+                    DashboardPageView(lat: defaultLat, lon: defaultLon, locationName: "Cairo", theme: themeEngine.currentTheme)
                 } else {
                     TabView(selection: $selectedLocationId) {
                         ForEach(savedLocationsVM.savedLocations) { location in
-                            DashboardPageView(lat: location.latitude, lon: location.longitude, theme: themeEngine.currentTheme)
+                            DashboardPageView(lat: location.latitude, lon: location.longitude, locationName: location.name, theme: themeEngine.currentTheme)
                                 .tag(location.id as UUID?)
                         }
                     }
@@ -104,11 +104,13 @@ struct DashboardPageView: View {
     @StateObject private var viewModel: DashboardViewModel
     let lat: Double
     let lon: Double
+    let locationName: String?
     let theme: ThemeType
     
-    init(lat: Double, lon: Double, theme: ThemeType) {
+    init(lat: Double, lon: Double, locationName: String?, theme: ThemeType) {
         self.lat = lat
         self.lon = lon
+        self.locationName = locationName
         self.theme = theme
         _viewModel = StateObject(wrappedValue: DependencyContainer.shared.container.resolve(DashboardViewModel.self)!)
     }
@@ -136,7 +138,8 @@ struct DashboardPageView: View {
                         forecast: viewModel.forecast,
                         theme: theme,
                         lat: lat,
-                        lon: lon
+                        lon: lon,
+                        locationName: locationName
                     )
                     .padding(.bottom, 40) // Space for page indicator
                 }
@@ -154,11 +157,12 @@ private struct WeatherContentView: View {
     let theme: ThemeType
     let lat: Double
     let lon: Double
+    let locationName: String?
 
     var body: some View {
         VStack(spacing: 20) {
             VStack(spacing: 8) {
-                Text(weather.locationName)
+                Text(locationName ?? weather.locationName)
                     .font(.system(size: 32, weight: .medium))
 
                 Text("\(Int(weather.temperature))°")
