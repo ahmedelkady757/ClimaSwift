@@ -12,51 +12,66 @@ struct SavedLocationsView: View {
         let container = DependencyContainer.shared.container
         _viewModel = StateObject(wrappedValue: container.resolve(SavedLocationsViewModel.self)!)
     }
+    
+    private var premiumBackground: some View {
+        LinearGradient(
+            colors: [
+                Color(red: 0.05, green: 0.05, blue: 0.15),
+                Color(red: 0.12, green: 0.18, blue: 0.35),
+                Color(red: 0.02, green: 0.05, blue: 0.1)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        .ignoresSafeArea()
+    }
 
     var body: some View {
         NavigationStack {
-            List {
+            ZStack {
+                premiumBackground
+                
                 if viewModel.isLoading {
                     ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(1.5)
                         .frame(maxWidth: .infinity, alignment: .center)
                 } else if let errorMessage = viewModel.errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
+                        .padding()
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(10)
                 } else if viewModel.savedLocations.isEmpty {
-                    Text("No saved locations yet.")
-                        .foregroundColor(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .center)
+                    VStack(spacing: 16) {
+                        Image(systemName: "globe.americas")
+                            .font(.system(size: 60))
+                            .foregroundColor(.white.opacity(0.5))
+                        Text("No saved locations yet.")
+                            .font(.title3)
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
                 } else {
-                    ForEach(viewModel.savedLocations) { location in
-                        HStack {
-                            VStack(alignment: .leading) {
-                                Text(location.name).font(.title3).bold()
-                                Text(location.country).font(.subheadline).foregroundColor(.secondary)
-                            }
-                            Spacer()
-                            // In a real app, we'd fetch the current temp here.
-                            // For now, we just display the location name.
-                        }
-                        .padding(.vertical, 8)
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                            Button(role: .destructive) {
-                                Task {
-                                    await viewModel.deleteLocation(byId: location.id)
+                    ScrollView {
+                        LazyVStack(spacing: 16) {
+                            ForEach(viewModel.savedLocations) { location in
+                                SavedLocationCard(location: location) {
+                                    Task { await viewModel.deleteLocation(byId: location.id) }
+                                } onTap: {
+                                    onLocationSelected?(location.latitude, location.longitude)
+                                    dismiss()
                                 }
-                            } label: {
-                                Label("Delete", systemImage: "trash")
                             }
                         }
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            onLocationSelected?(location.latitude, location.longitude)
-                            dismiss()
-                        }
+                        .padding()
                     }
                 }
             }
-            .listStyle(.plain)
             .navigationTitle("Saved Locations")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
@@ -64,20 +79,67 @@ struct SavedLocationsView: View {
                     } label: {
                         Image(systemName: "magnifyingglass")
                             .fontWeight(.semibold)
+                            .foregroundColor(.white)
                     }
                 }
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Done") {
                         dismiss()
                     }
+                    .foregroundColor(.white)
                 }
             }
-            .sheet(isPresented: $isShowingSearch) {
+            .sheet(isPresented: $isShowingSearch, onDismiss: {
+                Task {
+                    await viewModel.fetchSavedLocations()
+                }
+            }) {
                 SearchView()
             }
             .task {
                 await viewModel.fetchSavedLocations()
             }
         }
+    }
+}
+
+struct SavedLocationCard: View {
+    let location: LocationDomainModel
+    let onDelete: () -> Void
+    let onTap: () -> Void
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(location.name)
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                Text(location.country)
+                    .font(.subheadline)
+                    .foregroundColor(.white.opacity(0.7))
+            }
+            Spacer()
+            
+            Button(action: onDelete) {
+                Image(systemName: "trash")
+                    .foregroundColor(.red.opacity(0.9))
+                    .padding(12)
+                    .background(Color.white.opacity(0.15))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(PlainButtonStyle()) // Prevent whole card from tapping when deleting
+        }
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(.ultraThinMaterial)
+                .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+        )
+        .contentShape(Rectangle())
+        .onTapGesture(perform: onTap)
     }
 }
