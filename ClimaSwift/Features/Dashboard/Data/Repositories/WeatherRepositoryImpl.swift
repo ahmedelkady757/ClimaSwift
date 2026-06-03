@@ -29,12 +29,31 @@ class WeatherRepositoryImpl: WeatherRepositoryInterface {
                 humidity: dto.current.humidity,
                 feelsLike: dto.current.feelslike_c,
                 pressure: dto.current.pressure_mb,
-                forecast: dto.forecast.forecastday.map {
+                forecast: dto.forecast.forecastday.map { dayDTO in
                     ForecastDayModel(
-                        date: $0.date,
-                        iconURL: "https:\($0.day.condition.icon)",
-                        minTemp: $0.day.mintemp_c,
-                        maxTemp: $0.day.maxtemp_c
+                        date: dayDTO.date,
+                        iconURL: "https:\(dayDTO.day.condition.icon)",
+                        minTemp: dayDTO.day.mintemp_c,
+                        maxTemp: dayDTO.day.maxtemp_c,
+                        avgTemp: dayDTO.day.avgtemp_c,
+                        conditionText: dayDTO.day.condition.text,
+                        windSpeed: dayDTO.day.maxwind_kph,
+                        precipitation: dayDTO.day.totalprecip_mm,
+                        humidity: Int(dayDTO.day.avghumidity),
+                        uvIndex: dayDTO.day.uv,
+                        hourlyForecast: dayDTO.hour.map { hourDTO in
+                            HourlyForecastDomainModel(
+                                time: hourDTO.time,
+                                tempC: hourDTO.temp_c,
+                                conditionText: hourDTO.condition.text,
+                                conditionIconURL: "https:\(hourDTO.condition.icon)",
+                                feelsLikeC: hourDTO.feelslike_c,
+                                humidity: hourDTO.humidity,
+                                chanceOfRain: hourDTO.chance_of_rain,
+                                windKph: hourDTO.wind_kph,
+                                isDay: hourDTO.is_day
+                            )
+                        }
                     )
                 }
             )

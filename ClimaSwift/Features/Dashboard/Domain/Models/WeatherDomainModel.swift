@@ -21,12 +21,27 @@ struct WeatherDomainModel {
     let forecast: [ForecastDayModel]
 }
 
-struct ForecastDayModel: Identifiable {
+struct ForecastDayModel: Identifiable, Hashable {
     let id = UUID()
     let date: String
     let iconURL: String
     let minTemp: Double
     let maxTemp: Double
+    let avgTemp: Double
+    let conditionText: String
+    let windSpeed: Double
+    let precipitation: Double
+    let humidity: Int
+    let uvIndex: Double
+    let hourlyForecast: [HourlyForecastDomainModel]
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
+    static func == (lhs: ForecastDayModel, rhs: ForecastDayModel) -> Bool {
+        lhs.id == rhs.id
+    }
 }
 
 protocol WeatherRepositoryInterface {

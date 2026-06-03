@@ -53,5 +53,30 @@ class DependencyContainer {
                 getWeatherDashboardDataUseCase: resolver.resolve(GetWeatherDashboardDataUseCaseProtocol.self)!
             )
         }.inObjectScope(.transient)
+
+        container.register(RemoteHourlyForecastDataSource.self) { resolver in
+            RemoteHourlyForecastDataSource(
+                networkClient: resolver.resolve(NetworkClientProtocol.self)!,
+                apiKey: apiKey
+            )
+        }.inObjectScope(.transient)
+
+        container.register(HourlyForecastRepositoryInterface.self) { resolver in
+            HourlyForecastRepositoryImpl(
+                remoteDataSource: resolver.resolve(RemoteHourlyForecastDataSource.self)!
+            )
+        }.inObjectScope(.transient)
+
+        container.register(GetHourlyForecastUseCaseProtocol.self) { resolver in
+            GetHourlyForecastUseCase(
+                repository: resolver.resolve(HourlyForecastRepositoryInterface.self)!
+            )
+        }.inObjectScope(.transient)
+
+        container.register(HourlyForecastViewModel.self) { resolver in
+            HourlyForecastViewModel(
+                getHourlyForecastUseCase: resolver.resolve(GetHourlyForecastUseCaseProtocol.self)!
+            )
+        }.inObjectScope(.transient)
     }
 }

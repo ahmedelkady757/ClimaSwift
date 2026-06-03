@@ -22,31 +22,39 @@ struct DashboardView: View {
     }
 
     var body: some View {
-        ZStack {
-            AnimatedBackgroundView(theme: themeEngine.currentTheme)
+        NavigationStack {
+            ZStack {
+                AnimatedBackgroundView(theme: themeEngine.currentTheme)
 
-            switch viewModel.loadingState {
-            case .idle, .loading:
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: themeEngine.currentTheme.foregroundColor))
-                    .scaleEffect(1.5)
+                switch viewModel.loadingState {
+                case .idle, .loading:
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: themeEngine.currentTheme.foregroundColor))
+                        .scaleEffect(1.5)
 
-            case .failure(let message):
-                VStack(spacing: 12) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.largeTitle)
-                    Text(message)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
+                case .failure(let message):
+                    VStack(spacing: 12) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.largeTitle)
+                        Text(message)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
+                    .foregroundColor(themeEngine.currentTheme.foregroundColor)
+
+                case .success(let weather):
+                    WeatherContentView(
+                        weather: weather,
+                        forecast: viewModel.forecast,
+                        theme: themeEngine.currentTheme,
+                        lat: defaultLat,
+                        lon: defaultLon
+                    )
                 }
-                .foregroundColor(themeEngine.currentTheme.foregroundColor)
-
-            case .success(let weather):
-                WeatherContentView(weather: weather, forecast: viewModel.forecast, theme: themeEngine.currentTheme)
             }
-        }
-        .task {
-            await viewModel.fetchWeather(lat: defaultLat, lon: defaultLon)
+            .task {
+                await viewModel.fetchWeather(lat: defaultLat, lon: defaultLon)
+            }
         }
     }
 }
@@ -55,6 +63,8 @@ private struct WeatherContentView: View {
     let weather: WeatherDomainModel
     let forecast: [ForecastDayModel]
     let theme: ThemeType
+    let lat: Double
+    let lon: Double
 
     var body: some View {
         VStack(spacing: 20) {
@@ -72,9 +82,7 @@ private struct WeatherContentView: View {
                     .font(.headline)
 
                 WebImage(url: URL(string: weather.conditionIconURL)) { image in
-                    image
-                        .resizable()
-                        .scaledToFit()
+                    image.resizable().scaledToFit()
                 } placeholder: {
                     Image(systemName: "cloud.fill")
                         .resizable()
@@ -89,16 +97,22 @@ private struct WeatherContentView: View {
             Spacer()
 
             VStack(alignment: .leading, spacing: 12) {
-                Text("3-DAY FORECAST")
-                    .font(.caption)
-                    .fontWeight(.bold)
-                    .padding(.horizontal)
+                HStack {
+                    Text("3-DAY FORECAST")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                    Spacer()
+                }
+                .padding(.horizontal)
+                .foregroundColor(theme.foregroundColor.opacity(0.7))
 
                 Divider()
                     .background(theme.foregroundColor.opacity(0.3))
 
                 ForEach(forecast) { day in
-                    ForecastRowView(day: day, theme: theme)
+                    NavigationLink(destination: DailyForecastView(day: day, theme: theme)) {
+                        ForecastRowView(day: day, theme: theme)
+                    }
                 }
             }
             .padding()
@@ -130,9 +144,7 @@ private struct ForecastRowView: View {
             Spacer()
 
             WebImage(url: URL(string: day.iconURL)) { image in
-                image
-                    .resizable()
-                    .scaledToFit()
+                image.resizable().scaledToFit()
             } placeholder: {
                 Image(systemName: "cloud.fill")
                     .foregroundColor(theme.foregroundColor.opacity(0.4))
@@ -151,14 +163,11 @@ private struct ForecastRowView: View {
         formatter.dateFormat = "yyyy-MM-dd"
         guard let date = formatter.date(from: day.date) else { return day.date }
         let calendar = Calendar.current
-        
-        if calendar.isDateInToday(date) {
-            return "Today"
-        } else if calendar.isDateInTomorrow(date) {
-            return "Tomorrow"
-        } else {
+        if calendar.isDateInToday(date) { return "Today" }
+        else if calendar.isDateInTomorrow(date) { return "Tomorrow" }
+        else {
             let dayFormatter = DateFormatter()
-            dayFormatter.dateFormat = "EEEE" // Full day name (e.g., Wednesday)
+            dayFormatter.dateFormat = "EEEE"
             return dayFormatter.string(from: date)
         }
     }

@@ -38,10 +38,16 @@ struct ForecastDTO: Decodable {
 struct ForecastDayDTO: Decodable {
     let date: String
     let day: DayDTO
+    let hour: [HourDTO]
 }
 
 struct DayDTO: Decodable {
     let maxtemp_c: Double
     let mintemp_c: Double
+    let avgtemp_c: Double
+    let maxwind_kph: Double
+    let totalprecip_mm: Double
+    let avghumidity: Double
+    let uv: Double
     let condition: ConditionDTO
 }
