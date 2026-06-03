@@ -15,7 +15,7 @@ struct HourlyForecastView: View {
     let lat: Double
     let lon: Double
 
-    init(lat: Double = 30.0444, lon: Double = 31.2357) {
+    init(lat: Double = 30.5500, lon: Double = 30.9833) {
         self.lat = lat
         self.lon = lon
         let container = DependencyContainer.shared.container

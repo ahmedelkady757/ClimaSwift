@@ -15,8 +15,8 @@ struct DashboardView: View {
     @State private var isShowingLocations = false
     @State private var selectedLocationId: UUID?
     
-    private let defaultLat: Double = 30.0444
-    private let defaultLon: Double = 31.2357
+    private let defaultLat: Double = 30.5500
+    private let defaultLon: Double = 30.9833
 
     init() {
         let container = DependencyContainer.shared.container
@@ -30,7 +30,7 @@ struct DashboardView: View {
                 AnimatedBackgroundView(theme: themeEngine.currentTheme)
 
                 if savedLocationsVM.savedLocations.isEmpty {
-                    DashboardPageView(lat: defaultLat, lon: defaultLon, locationName: "Cairo", theme: themeEngine.currentTheme)
+                    DashboardPageView(lat: defaultLat, lon: defaultLon, locationName: "Menofia", theme: themeEngine.currentTheme)
                 } else {
                     TabView(selection: $selectedLocationId) {
                         ForEach(savedLocationsVM.savedLocations) { location in
@@ -165,7 +165,7 @@ private struct WeatherContentView: View {
                 Text(locationName ?? weather.locationName)
                     .font(.system(size: 32, weight: .medium))
 
-                Text("\(Int(weather.temperature))°")
+                Text("\(Int(forecast.first?.avgTemp ?? weather.temperature))°")
                     .font(.system(size: 72, weight: .thin))
 
                 Text(weather.conditionText)
