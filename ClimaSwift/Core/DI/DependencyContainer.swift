@@ -6,6 +6,7 @@
 //
 
 import Swinject
+import SwiftData
 
 class DependencyContainer {
     static let shared = DependencyContainer()
@@ -76,6 +77,49 @@ class DependencyContainer {
         container.register(HourlyForecastViewModel.self) { resolver in
             HourlyForecastViewModel(
                 getHourlyForecastUseCase: resolver.resolve(GetHourlyForecastUseCaseProtocol.self)!
+            )
+        }.inObjectScope(.transient)
+
+        // Features - Location Search
+        container.register(ModelContainer.self) { _ in
+            let schema = Schema([LocationSwiftDataModel.self])
+            let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+            return try! ModelContainer(for: schema, configurations: [config])
+        }.inObjectScope(.container)
+
+        container.register(LocalLocationDataSourceProtocol.self) { resolver in
+            LocalLocationDataSource(modelContainer: resolver.resolve(ModelContainer.self)!)
+        }.inObjectScope(.container)
+
+        container.register(RemoteSearchDataSourceProtocol.self) { resolver in
+            RemoteSearchDataSource(networkClient: resolver.resolve(NetworkClientProtocol.self)!)
+        }.inObjectScope(.transient)
+
+        container.register(LocationRepositoryInterface.self) { resolver in
+            LocationRepositoryImpl(
+                remoteDataSource: resolver.resolve(RemoteSearchDataSourceProtocol.self)!,
+                localDataSource: resolver.resolve(LocalLocationDataSourceProtocol.self)!
+            )
+        }.inObjectScope(.transient)
+
+        container.register(SearchLocationUseCaseProtocol.self) { resolver in
+            SearchLocationUseCase(repository: resolver.resolve(LocationRepositoryInterface.self)!)
+        }.inObjectScope(.transient)
+
+        container.register(ManageSavedLocationsUseCaseProtocol.self) { resolver in
+            ManageSavedLocationsUseCase(repository: resolver.resolve(LocationRepositoryInterface.self)!)
+        }.inObjectScope(.transient)
+
+        container.register(SearchViewModel.self) { resolver in
+            SearchViewModel(
+                searchUseCase: resolver.resolve(SearchLocationUseCaseProtocol.self)!,
+                manageSavedUseCase: resolver.resolve(ManageSavedLocationsUseCaseProtocol.self)!
+            )
+        }.inObjectScope(.transient)
+
+        container.register(SavedLocationsViewModel.self) { resolver in
+            SavedLocationsViewModel(
+                manageSavedUseCase: resolver.resolve(ManageSavedLocationsUseCaseProtocol.self)!
             )
         }.inObjectScope(.transient)
     }

@@ -15,7 +15,7 @@ struct HourlyForecastView: View {
     let lat: Double
     let lon: Double
 
-    init(lat: Double = 30.0444, lon: Double = 31.2357) {
+    init(lat: Double = 30.5500, lon: Double = 30.9833) {
         self.lat = lat
         self.lon = lon
         let container = DependencyContainer.shared.container
@@ -107,23 +107,29 @@ private struct HourlyStripCard: View {
                 Image(systemName: "cloud.fill")
                     .foregroundColor(theme.foregroundColor.opacity(0.4))
             }
-            .frame(width: 36, height: 36)
+            .frame(width: 64, height: 64)
 
             Text("\(Int(hour.tempC))°")
                 .font(.headline)
                 .foregroundColor(theme.foregroundColor)
 
             if hour.chanceOfRain > 0 {
-                HStack(spacing: 2) {
-                    Image(systemName: "drop.fill").font(.system(size: 9))
-                    Text("\(hour.chanceOfRain)%").font(.caption2)
+                HStack(spacing: 3) {
+                    Image(systemName: "drop.fill")
+                        .font(.system(size: 11, weight: .bold))
+                    Text("\(hour.chanceOfRain)%")
+                        .font(.system(size: 12, weight: .bold))
                 }
-                .foregroundColor(.blue.opacity(0.8))
+                .foregroundColor(.white)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 3)
+                .background(Color(red: 0.13, green: 0.53, blue: 0.95).opacity(0.85))
+                .clipShape(Capsule())
             }
         }
         .padding(.vertical, 10)
         .padding(.horizontal, 6)
-        .frame(minWidth: 60)
+        .frame(minWidth: 72)
     }
 
     private var formattedTime: String {
@@ -192,7 +198,7 @@ private struct HourlyDetailRow: View {
                         Image(systemName: "drop.fill").font(.caption2)
                         Text("\(hour.chanceOfRain)%").font(.caption)
                     }
-                    .foregroundColor(.blue.opacity(0.85))
+                    .foregroundColor(Color(red: 0.20, green: 0.82, blue: 1.00))
                 }
             }
             .foregroundColor(theme.foregroundColor.opacity(0.7))

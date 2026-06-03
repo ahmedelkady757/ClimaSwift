@@ -10,15 +10,18 @@ import SDWebImageSwiftUI
 
 struct DashboardView: View {
     @StateObject private var themeEngine: DynamicThemeEngine
-    @StateObject private var viewModel: DashboardViewModel
+    @StateObject private var savedLocationsVM: SavedLocationsViewModel
 
-    private let defaultLat: Double = 30.0444
-    private let defaultLon: Double = 31.2357
+    @State private var isShowingLocations = false
+    @State private var selectedLocationId: UUID?
+    
+    private let defaultLat: Double = 30.5500
+    private let defaultLon: Double = 30.9833
 
     init() {
         let container = DependencyContainer.shared.container
         _themeEngine = StateObject(wrappedValue: container.resolve(DynamicThemeEngine.self)!)
-        _viewModel = StateObject(wrappedValue: container.resolve(DashboardViewModel.self)!)
+        _savedLocationsVM = StateObject(wrappedValue: container.resolve(SavedLocationsViewModel.self)!)
     }
 
     var body: some View {
@@ -26,35 +29,125 @@ struct DashboardView: View {
             ZStack {
                 AnimatedBackgroundView(theme: themeEngine.currentTheme)
 
-                switch viewModel.loadingState {
-                case .idle, .loading:
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: themeEngine.currentTheme.foregroundColor))
-                        .scaleEffect(1.5)
-
-                case .failure(let message):
-                    VStack(spacing: 12) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .font(.largeTitle)
-                        Text(message)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
+                if savedLocationsVM.savedLocations.isEmpty {
+                    DashboardPageView(lat: defaultLat, lon: defaultLon, locationName: "Menofia", theme: themeEngine.currentTheme)
+                } else {
+                    TabView(selection: $selectedLocationId) {
+                        ForEach(savedLocationsVM.savedLocations) { location in
+                            DashboardPageView(lat: location.latitude, lon: location.longitude, locationName: location.name, theme: themeEngine.currentTheme)
+                                .tag(location.id as UUID?)
+                        }
                     }
-                    .foregroundColor(themeEngine.currentTheme.foregroundColor)
-
-                case .success(let weather):
-                    WeatherContentView(
-                        weather: weather,
-                        forecast: viewModel.forecast,
-                        theme: themeEngine.currentTheme,
-                        lat: defaultLat,
-                        lon: defaultLon
-                    )
+                    .tabViewStyle(.page(indexDisplayMode: .never))
                 }
             }
             .task {
-                await viewModel.fetchWeather(lat: defaultLat, lon: defaultLon)
+                await savedLocationsVM.fetchSavedLocations()
+                if selectedLocationId == nil {
+                    selectedLocationId = savedLocationsVM.savedLocations.first?.id
+                }
             }
+            .onReceive(savedLocationsVM.$savedLocations) { locations in
+                if let current = selectedLocationId, !locations.contains(where: { $0.id == current }) {
+                    selectedLocationId = locations.first?.id
+                } else if selectedLocationId == nil {
+                    selectedLocationId = locations.first?.id
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        isShowingLocations = true
+                    } label: {
+                        Image(systemName: "list.bullet")
+                            .foregroundColor(themeEngine.currentTheme.foregroundColor)
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if !savedLocationsVM.savedLocations.isEmpty, let currentId = selectedLocationId {
+                        Button {
+                            Task {
+                                await savedLocationsVM.deleteLocation(byId: currentId)
+                            }
+                        } label: {
+                            Image(systemName: "star.fill")
+                                .foregroundColor(.blue)
+                                .font(.system(size: 20))
+                        }
+                    } else {
+                        Button {
+                            // No-op for default location
+                        } label: {
+                            Image(systemName: "star")
+                                .foregroundColor(themeEngine.currentTheme.foregroundColor.opacity(0.5))
+                        }
+                        .disabled(true)
+                    }
+                }
+            }
+            .sheet(isPresented: $isShowingLocations, onDismiss: {
+                Task {
+                    await savedLocationsVM.fetchSavedLocations()
+                }
+            }) {
+                SavedLocationsView { selectedLat, selectedLon in
+                    if let location = savedLocationsVM.savedLocations.first(where: { abs($0.latitude - selectedLat) < 0.01 && abs($0.longitude - selectedLon) < 0.01 }) {
+                        selectedLocationId = location.id
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct DashboardPageView: View {
+    @StateObject private var viewModel: DashboardViewModel
+    let lat: Double
+    let lon: Double
+    let locationName: String?
+    let theme: ThemeType
+    
+    init(lat: Double, lon: Double, locationName: String?, theme: ThemeType) {
+        self.lat = lat
+        self.lon = lon
+        self.locationName = locationName
+        self.theme = theme
+        _viewModel = StateObject(wrappedValue: DependencyContainer.shared.container.resolve(DashboardViewModel.self)!)
+    }
+    
+    var body: some View {
+        Group {
+            switch viewModel.loadingState {
+            case .idle, .loading:
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: theme.foregroundColor))
+                    .scaleEffect(1.5)
+            case .failure(let message):
+                VStack(spacing: 12) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.largeTitle)
+                    Text(message)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+                .foregroundColor(theme.foregroundColor)
+            case .success(let weather):
+                ScrollView(showsIndicators: false) {
+                    WeatherContentView(
+                        weather: weather,
+                        forecast: viewModel.forecast,
+                        theme: theme,
+                        lat: lat,
+                        lon: lon,
+                        locationName: locationName
+                    )
+                    .padding(.bottom, 40) // Space for page indicator
+                }
+            }
+        }
+        .task(id: "\(lat)-\(lon)") {
+            await viewModel.fetchWeather(lat: lat, lon: lon)
         }
     }
 }
@@ -65,14 +158,15 @@ private struct WeatherContentView: View {
     let theme: ThemeType
     let lat: Double
     let lon: Double
+    let locationName: String?
 
     var body: some View {
         VStack(spacing: 20) {
             VStack(spacing: 8) {
-                Text(weather.locationName)
+                Text(locationName ?? weather.locationName)
                     .font(.system(size: 32, weight: .medium))
 
-                Text("\(Int(weather.temperature))°")
+                Text("\(Int(forecast.first?.avgTemp ?? weather.temperature))°")
                     .font(.system(size: 72, weight: .thin))
 
                 Text(weather.conditionText)
@@ -149,7 +243,7 @@ private struct ForecastRowView: View {
                 Image(systemName: "cloud.fill")
                     .foregroundColor(theme.foregroundColor.opacity(0.4))
             }
-            .frame(width: 28, height: 28)
+            .frame(width: 44, height: 44)
 
             Spacer()
 
