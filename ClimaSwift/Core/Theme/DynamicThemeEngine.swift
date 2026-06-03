@@ -2,10 +2,8 @@
 //  DynamicThemeEngine.swift
 //  ClimaSwift
 //
-//  Updated: foreground colors tuned for new sky backgrounds.
-//  Morning sky is bright (blues + gold) → deep navy text for contrast.
-//  Evening sky is dark (indigo/navy) → warm white text for contrast.
-//
+//  Created by JETSMobileLabMini6 on 01/06/2026.
+
 
 import SwiftUI
 
@@ -17,15 +15,12 @@ enum ThemeType: Equatable {
     var foregroundColor: Color {
         switch self {
         case .morning:
-            // Deep navy — high contrast on the bright blue/golden morning sky
             return Color(red: 0.06, green: 0.13, blue: 0.28)
         case .evening:
-            // Warm off-white — easy to read on the deep indigo/navy night sky
             return Color(red: 0.97, green: 0.96, blue: 0.92)
         }
     }
 
-    /// Secondary / muted text (captions, subtitles)
     var secondaryColor: Color {
         switch self {
         case .morning:
@@ -35,7 +30,6 @@ enum ThemeType: Equatable {
         }
     }
 
-    /// Card / panel tint
     var cardBackground: Color {
         switch self {
         case .morning:

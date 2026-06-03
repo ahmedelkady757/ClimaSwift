@@ -2,14 +2,9 @@
 //  AnimatedBackgroundView.swift
 //  ClimaSwift
 //
-//  Refactored: full pure-SwiftUI animated sky.
-//  Morning → layered dawn/day sky gradient, animated sun with corona rays,
-//             procedural clouds drifting L→R, birds flapping across the screen.
-//  Evening → deep indigo/navy gradient, crescent moon with glow,
-//             twinkling stars (warm amber/gold tones), shooting stars.
-//  Text contrast: morning uses deep navy text; evening uses warm white text.
-//  No Lottie dependency required.
+//  Created by JETSMobileLabMini6 on 01/06/2026.
 //
+
 
 import SwiftUI
 
@@ -100,15 +95,12 @@ struct EveningSkyView: View {
             )
             .ignoresSafeArea()
 
-            // ── Stars ─────────────────────────────────────────────
             StarsView()
 
-            // ── Shooting stars ────────────────────────────────────
             ForEach(0..<3, id: \.self) { i in
                 ShootingStarView(index: i)
             }
 
-            // ── Moon ──────────────────────────────────────────────
             MoonView()
         }
     }
@@ -309,17 +301,11 @@ private struct MoonView: View {
                 .frame(width: 105, height: 105)
                 .shadow(color: Color(hex: "FFE88A").opacity(0.5), radius: 22)
 
-            // Crescent mask — offset circle cuts the moon
-            Circle()
-                .fill(Color(hex: "0D1B3E"))   // matches sky background
-                .frame(width: 88, height: 88)
-                .offset(x: 28, y: -10)
-
-            // Subtle crater dots
+            
             Group {
                 Circle().fill(Color(hex: "EEE4B0").opacity(0.6)).frame(width: 9, height: 9).offset(x: -20, y: -18)
                 Circle().fill(Color(hex: "EEE4B0").opacity(0.4)).frame(width: 6, height: 6).offset(x: -32, y: 8)
-                Circle().fill(Color(hex: "EEE4B0").opacity(0.3)).frame(width: 5, height: 5).offset(x: -14, y: 28)
+                
             }
         }
         .offset(x: screenW * 0.26, y: -screenH * 0.30)
@@ -336,7 +322,7 @@ private struct MoonView: View {
 private struct StarsView: View {
     // Fixed seed-based star data so positions are stable (no random on each redraw)
     private let stars: [StarData] = (0..<70).map { i -> StarData in
-        let seed = UInt64(i &* 6364136223846793005 &+ 1442695040888963407)
+        let seed = UInt64(i) &* 6364136223846793005 &+ 1442695040888963407
         func rng(_ s: UInt64) -> Double { Double(s >> 33) / Double(1 << 31) }
         let x = rng(seed) * UIScreen.main.bounds.width
         let y = rng(seed &* 2) * UIScreen.main.bounds.height * 0.72
