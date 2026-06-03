@@ -72,7 +72,8 @@ struct DashboardView: View {
                             }
                         } label: {
                             Image(systemName: "star.fill")
-                                .foregroundColor(.yellow)
+                                .foregroundColor(.blue)
+                                .font(.system(size: 20))
                         }
                     } else {
                         Button {
@@ -242,7 +243,7 @@ private struct ForecastRowView: View {
                 Image(systemName: "cloud.fill")
                     .foregroundColor(theme.foregroundColor.opacity(0.4))
             }
-            .frame(width: 28, height: 28)
+            .frame(width: 44, height: 44)
 
             Spacer()
 
