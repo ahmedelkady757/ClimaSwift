@@ -2,7 +2,7 @@
 //  DailyForecastView.swift
 //  ClimaSwift
 //
-//  Created by Manus on 02/06/2026.
+//  Created by JETSMobileLabMini6 on 02/06/2026.
 //
 
 import SwiftUI
@@ -119,6 +119,8 @@ struct DailyForecastView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                 isVisible = true
@@ -141,43 +143,57 @@ private struct HourlyForecastRow: View {
     let theme: ThemeType
     
     var body: some View {
-        HStack(spacing: 15) {
+        HStack(spacing: 12) {
+            // Time
             Text(formattedTime)
                 .font(.system(size: 16, weight: .medium))
                 .foregroundColor(theme.foregroundColor)
                 .frame(width: 60, alignment: .leading)
             
+            // Condition icon
             WebImage(url: URL(string: hour.conditionIconURL)) { image in
                 image.resizable().scaledToFit()
             } placeholder: {
                 Image(systemName: "cloud.fill")
                     .foregroundColor(theme.foregroundColor.opacity(0.4))
             }
-            .frame(width: 30, height: 30)
+            .frame(width: 50, height: 50)
             
+            // Temperature
             Text("\(Int(hour.tempC))°")
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundColor(theme.foregroundColor)
+                .frame(width: 44, alignment: .leading)
             
-            Spacer()
+            Spacer(minLength: 4)
             
-            if hour.chanceOfRain > 0 {
+            // Trailing: rain badge stacked above condition text — no overflow
+            VStack(alignment: .trailing, spacing: 4) {
                 HStack(spacing: 4) {
                     Image(systemName: "drop.fill")
-                        .font(.system(size: 10))
+                        .font(.system(size: 10, weight: .bold))
                     Text("\(hour.chanceOfRain)%")
                         .font(.system(size: 12, weight: .bold))
                 }
-                .foregroundColor(Color(hex: "4FC3F7"))
+                .foregroundColor(.white)
+                .padding(.horizontal, 7)
+                .padding(.vertical, 3)
+                .background(
+                    hour.chanceOfRain > 0
+                        ? Color(red: 0.13, green: 0.53, blue: 0.95).opacity(0.9)
+                        : Color.white.opacity(0.15)
+                )
+                .clipShape(Capsule())
+                
+                Text(hour.conditionText)
+                    .font(.system(size: 11))
+                    .foregroundColor(theme.foregroundColor.opacity(0.7))
+                    .lineLimit(1)
+                    .frame(maxWidth: 110, alignment: .trailing)
             }
-            
-            Text(hour.conditionText)
-                .font(.system(size: 12))
-                .foregroundColor(theme.foregroundColor.opacity(0.7))
-                .lineLimit(1)
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
     }
     
     private var formattedTime: String {
