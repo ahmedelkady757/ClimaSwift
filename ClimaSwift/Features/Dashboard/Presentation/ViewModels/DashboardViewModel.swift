@@ -5,7 +5,6 @@
 //  Created by JETSMobileLabMini6 on 01/06/2026.
 //
 
-
 import Foundation
 
 enum WeatherLoadingState {
@@ -17,21 +16,25 @@ enum WeatherLoadingState {
 
 class DashboardViewModel: ObservableObject {
     @Published var loadingState: WeatherLoadingState = .idle
+    @Published var forecast: [ForecastDayModel] = []
 
-    private let getCurrentWeatherUseCase: GetCurrentWeatherUseCaseProtocol
+    private let getWeatherDashboardDataUseCase: GetWeatherDashboardDataUseCaseProtocol
 
-    init(getCurrentWeatherUseCase: GetCurrentWeatherUseCaseProtocol) {
-        self.getCurrentWeatherUseCase = getCurrentWeatherUseCase
+    init(getWeatherDashboardDataUseCase: GetWeatherDashboardDataUseCaseProtocol) {
+        self.getWeatherDashboardDataUseCase = getWeatherDashboardDataUseCase
     }
 
     @MainActor
     func fetchWeather(lat: Double, lon: Double) async {
         loadingState = .loading
         do {
-            let weather = try await getCurrentWeatherUseCase.execute(lat: lat, lon: lon)
-            loadingState = .success(weather)
+            let weather = try await getWeatherDashboardDataUseCase.execute(lat: lat, lon: lon)
+            self.forecast = weather.forecast
+            self.loadingState = .success(weather)
+        } catch let error as AppError {
+            self.loadingState = .failure(error.errorDescription ?? "An error occurred.")
         } catch {
-            loadingState = .failure(error.localizedDescription)
+            self.loadingState = .failure(error.localizedDescription)
         }
     }
 }
