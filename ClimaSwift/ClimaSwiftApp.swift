@@ -12,7 +12,6 @@ import SwiftData
 struct ClimaSwiftApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
             LocationSwiftDataModel.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)

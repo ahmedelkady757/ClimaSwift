@@ -64,6 +64,7 @@ struct DashboardView: View {
                     }
                 }
                 
+                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if !savedLocationsVM.savedLocations.isEmpty, let currentId = selectedLocationId {
                         Button {
@@ -86,6 +87,7 @@ struct DashboardView: View {
                     }
                 }
             }
+            .toolbarBackground(.hidden, for: .navigationBar)
             .sheet(isPresented: $isShowingLocations, onDismiss: {
                 Task {
                     await savedLocationsVM.fetchSavedLocations()
