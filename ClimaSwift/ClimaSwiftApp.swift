@@ -10,6 +10,8 @@ import SwiftData
 
 @main
 struct ClimaSwiftApp: App {
+    @State private var showSplash = true
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             LocationSwiftDataModel.self
@@ -25,7 +27,21 @@ struct ClimaSwiftApp: App {
 
     var body: some Scene {
         WindowGroup {
-            DashboardView()
+            ZStack {
+                DashboardView()
+
+                if showSplash {
+                    SplashScreenView()
+                        .transition(.opacity)
+                        .zIndex(1)
+                }
+            }
+            .task {
+                try? await Task.sleep(for: .seconds(2))
+                withAnimation(.easeOut(duration: 0.4)) {
+                    showSplash = false
+                }
+            }
         }
         .modelContainer(sharedModelContainer)
     }
