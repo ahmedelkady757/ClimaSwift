@@ -44,10 +44,26 @@ class DynamicThemeEngine: ObservableObject {
     @Published var currentTheme: ThemeType = .morning
 
     init() {
-        updateTheme()
+        updateThemeFromDevice()   // sensible default before any city data arrives
     }
 
-    func updateTheme() {
+    /// Called once weather data loads — uses the **city's** wall-clock hour from the API.
+    /// `localtime` format: "yyyy-MM-dd HH:mm"  (WeatherAPI standard)
+    func updateTheme(for localtime: String) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+
+        if let date = formatter.date(from: localtime) {
+            let hour = Calendar.current.component(.hour, from: date)
+            currentTheme = (hour >= 5 && hour < 18) ? .morning : .evening
+        } else {
+            updateThemeFromDevice()   // graceful fallback if parsing fails
+        }
+    }
+
+    /// Fallback: uses the running device's local clock (only for initial state).
+    private func updateThemeFromDevice() {
         let hour = Calendar.current.component(.hour, from: Date())
         currentTheme = (hour >= 5 && hour < 18) ? .morning : .evening
     }

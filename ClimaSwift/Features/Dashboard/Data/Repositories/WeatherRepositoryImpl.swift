@@ -20,6 +20,7 @@ class WeatherRepositoryImpl: WeatherRepositoryInterface {
             
             return WeatherDomainModel(
                 locationName: dto.location.name,
+                localtime: dto.location.localtime,
                 temperature: dto.current.temp_c,
                 conditionText: dto.current.condition.text,
                 conditionIconURL: "https:\(dto.current.condition.icon)",

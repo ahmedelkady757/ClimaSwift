@@ -14,7 +14,12 @@ struct DashboardView: View {
 
     @State private var isShowingLocations = false
     @State private var selectedLocationId: UUID?
-    
+    /// Localtime strings keyed by location UUID — populated lazily as each page loads.
+    @State private var localtimeCache: [UUID: String] = [:]
+    /// Pending theme-update task — cancelled and replaced on every selectedLocationId change
+    /// so that snap-back swipes (drag past 50% then reverse) never flash the wrong theme.
+    @State private var themeUpdateTask: Task<Void, Never>? = nil
+
     private let defaultLat: Double = 30.5500
     private let defaultLon: Double = 30.9833
 
@@ -30,15 +35,62 @@ struct DashboardView: View {
                 AnimatedBackgroundView(theme: themeEngine.currentTheme)
 
                 if savedLocationsVM.savedLocations.isEmpty {
-                    DashboardPageView(lat: defaultLat, lon: defaultLon, locationName: "Menofia", theme: themeEngine.currentTheme)
+                    // Default location — no swipe, update theme directly when data loads
+                    DashboardPageView(
+                        lat: defaultLat,
+                        lon: defaultLon,
+                        locationName: "Menofia",
+                        theme: themeEngine.currentTheme,
+                        onLocaltimeLoaded: { localtime in
+                            themeEngine.updateTheme(for: localtime)
+                        }
+                    )
                 } else {
                     TabView(selection: $selectedLocationId) {
                         ForEach(savedLocationsVM.savedLocations) { location in
-                            DashboardPageView(lat: location.latitude, lon: location.longitude, locationName: location.name, theme: themeEngine.currentTheme)
-                                .tag(location.id as UUID?)
+                            DashboardPageView(
+                                lat: location.latitude,
+                                lon: location.longitude,
+                                locationName: location.name,
+                                theme: themeEngine.currentTheme,
+                                onLocaltimeLoaded: { localtime in
+                                    // Cache the city's localtime when its data first arrives.
+                                    localtimeCache[location.id] = localtime
+                                    // Only apply theme if this is the committed page AND no
+                                    // debounced task is already pending for a different page.
+                                    if selectedLocationId == location.id {
+                                        themeUpdateTask?.cancel()
+                                        themeUpdateTask = Task { @MainActor in
+                                            try? await Task.sleep(nanoseconds: 350_000_000)
+                                            guard !Task.isCancelled else { return }
+                                            // Re-check after the delay — user might have swiped away
+                                            if selectedLocationId == location.id {
+                                                themeEngine.updateTheme(for: localtime)
+                                            }
+                                        }
+                                    }
+                                }
+                            )
+                            .tag(location.id as UUID?)
                         }
                     }
                     .tabViewStyle(.page(indexDisplayMode: .never))
+                    // onChange fires when the drag crosses the 50% threshold — NOT on finger lift.
+                    // Using a debounced task ensures snap-backs (drag past 50% → reverse) cancel
+                    // the in-flight update so only the truly committed page applies its theme.
+                    .onChange(of: selectedLocationId) { _, newId in
+                        themeUpdateTask?.cancel()
+                        themeUpdateTask = Task { @MainActor in
+                            // Wait long enough for a snap-back swipe to complete (~300 ms).
+                            try? await Task.sleep(nanoseconds: 350_000_000)
+                            guard !Task.isCancelled, let newId else { return }
+                            if let cachedLocaltime = localtimeCache[newId] {
+                                themeEngine.updateTheme(for: cachedLocaltime)
+                            }
+                            // If no cache yet, the page's onLocaltimeLoaded callback will apply
+                            // the theme once the fetch completes (also guarded by selectedLocationId).
+                        }
+                    }
                 }
             }
             .task {
@@ -63,8 +115,7 @@ struct DashboardView: View {
                             .foregroundColor(themeEngine.currentTheme.foregroundColor)
                     }
                 }
-                
-                
+
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if !savedLocationsVM.savedLocations.isEmpty, let currentId = selectedLocationId {
                         Button {
@@ -109,15 +160,19 @@ struct DashboardPageView: View {
     let lon: Double
     let locationName: String?
     let theme: ThemeType
-    
-    init(lat: Double, lon: Double, locationName: String?, theme: ThemeType) {
+    /// Called exactly once when weather data first loads — passes the city's localtime string.
+    /// The parent decides when/whether to act on it (e.g. only on committed tab selection).
+    let onLocaltimeLoaded: (String) -> Void
+
+    init(lat: Double, lon: Double, locationName: String?, theme: ThemeType, onLocaltimeLoaded: @escaping (String) -> Void) {
         self.lat = lat
         self.lon = lon
         self.locationName = locationName
         self.theme = theme
+        self.onLocaltimeLoaded = onLocaltimeLoaded
         _viewModel = StateObject(wrappedValue: DependencyContainer.shared.container.resolve(DashboardViewModel.self)!)
     }
-    
+
     var body: some View {
         Group {
             switch viewModel.loadingState {
@@ -150,6 +205,11 @@ struct DashboardPageView: View {
         }
         .task(id: "\(lat)-\(lon)") {
             await viewModel.fetchWeather(lat: lat, lon: lon)
+            // Report the city's localtime to the parent via callback.
+            // The parent is responsible for deciding when to apply the theme change.
+            if case .success(let weather) = viewModel.loadingState {
+                onLocaltimeLoaded(weather.localtime)
+            }
         }
     }
 }
