@@ -9,7 +9,7 @@ import Foundation
 
 struct WeatherDomainModel {
     let locationName: String
-    let localtime: String       // City's wall-clock time from API, e.g. "2024-01-15 22:30"
+    let localtime: String       
     let temperature: Double
     let conditionText: String
     let conditionIconURL: String
