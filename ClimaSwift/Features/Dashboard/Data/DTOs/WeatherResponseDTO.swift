@@ -15,7 +15,7 @@ struct WeatherResponseDTO: Decodable {
 
 struct LocationDTO: Decodable {
     let name: String
-    let localtime: String   // e.g. "2024-01-15 22:30" — city's wall-clock time
+    let localtime: String   
 }
 
 struct CurrentWeatherDTO: Decodable {

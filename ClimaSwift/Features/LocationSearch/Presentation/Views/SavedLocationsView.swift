@@ -22,7 +22,7 @@ struct SavedLocationsView: View {
                 
                 if viewModel.isLoading {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .progressViewStyle(CircularProgressViewStyle(tint: themeEngine.currentTheme.foregroundColor))
                         .scaleEffect(1.5)
                         .frame(maxWidth: .infinity, alignment: .center)
                 } else if let errorMessage = viewModel.errorMessage {
@@ -35,17 +35,17 @@ struct SavedLocationsView: View {
                     VStack(spacing: 16) {
                         Image(systemName: "globe.americas")
                             .font(.system(size: 60))
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(themeEngine.currentTheme.foregroundColor.opacity(0.5))
                         Text("No saved locations yet.")
                             .font(.title3)
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(themeEngine.currentTheme.foregroundColor.opacity(0.7))
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 16) {
                             ForEach(viewModel.savedLocations) { location in
-                                SavedLocationCard(location: location) {
+                                SavedLocationCard(location: location, theme: themeEngine.currentTheme) {
                                     Task { await viewModel.deleteLocation(byId: location.id) }
                                 } onTap: {
                                     onLocationSelected?(location.latitude, location.longitude)
@@ -60,7 +60,7 @@ struct SavedLocationsView: View {
             .navigationTitle("Saved Locations")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarColorScheme(themeEngine.currentTheme == .evening ? .dark : .light, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
@@ -68,14 +68,14 @@ struct SavedLocationsView: View {
                     } label: {
                         Image(systemName: "magnifyingglass")
                             .fontWeight(.semibold)
-                            .foregroundColor(.white)
+                            .foregroundColor(themeEngine.currentTheme.foregroundColor)
                     }
                 }
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Done") {
                         dismiss()
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(themeEngine.currentTheme.foregroundColor)
                 }
             }
             .sheet(isPresented: $isShowingSearch, onDismiss: {
@@ -94,6 +94,7 @@ struct SavedLocationsView: View {
 
 struct SavedLocationCard: View {
     let location: LocationDomainModel
+    let theme: ThemeType
     let onDelete: () -> Void
     let onTap: () -> Void
 
@@ -102,10 +103,10 @@ struct SavedLocationCard: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(location.name)
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(theme.foregroundColor)
                 Text(location.country)
                     .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(theme.foregroundColor.opacity(0.7))
             }
             Spacer()
             
@@ -113,7 +114,7 @@ struct SavedLocationCard: View {
                 Image(systemName: "trash")
                     .foregroundColor(.red.opacity(0.9))
                     .padding(12)
-                    .background(Color.white.opacity(0.15))
+                    .background(Color.white.opacity(theme == .morning ? 0.3 : 0.15))
                     .clipShape(Circle())
             }
             .buttonStyle(PlainButtonStyle()) // Prevent whole card from tapping when deleting
@@ -126,7 +127,7 @@ struct SavedLocationCard: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 20)
-                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                .stroke(theme.foregroundColor.opacity(0.2), lineWidth: 1)
         )
         .contentShape(Rectangle())
         .onTapGesture(perform: onTap)

@@ -32,4 +32,14 @@ final class SavedLocationsViewModel: ObservableObject {
             errorMessage = error.localizedDescription
         }
     }
+    
+    @MainActor
+    func saveLocation(_ location: LocationDomainModel) async {
+        do {
+            try await manageSavedUseCase.saveLocation(location)
+            await fetchSavedLocations()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
 }

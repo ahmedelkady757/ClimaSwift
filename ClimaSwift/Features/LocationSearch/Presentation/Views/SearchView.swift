@@ -21,7 +21,7 @@ struct SearchView: View {
                         HStack {
                             Spacer()
                             ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .progressViewStyle(CircularProgressViewStyle(tint: themeEngine.currentTheme.foregroundColor))
                             Spacer()
                         }
                         .listRowBackground(Color.clear)
@@ -35,10 +35,10 @@ struct SearchView: View {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(location.name)
                                         .font(.headline)
-                                        .foregroundColor(.white)
+                                        .foregroundColor(themeEngine.currentTheme.foregroundColor)
                                     Text("\(location.region), \(location.country)")
                                         .font(.subheadline)
-                                        .foregroundColor(.white.opacity(0.7))
+                                        .foregroundColor(themeEngine.currentTheme.foregroundColor.opacity(0.7))
                                 }
                                 Spacer()
                                 if location.isSaved {
@@ -48,7 +48,7 @@ struct SearchView: View {
                                 }
                             }
                             .padding(.vertical, 8)
-                            .listRowBackground(Color.white.opacity(0.1))
+                            .listRowBackground(themeEngine.currentTheme.cardBackground)
                             .contentShape(Rectangle())
                             .onTapGesture {
                                 Task {
@@ -65,14 +65,14 @@ struct SearchView: View {
             .navigationTitle("Search Location")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarColorScheme(themeEngine.currentTheme == .evening ? .dark : .light, for: .navigationBar)
             .searchable(text: $viewModel.searchQuery, prompt: "Search for a city...")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(themeEngine.currentTheme.foregroundColor)
                 }
             }
         }

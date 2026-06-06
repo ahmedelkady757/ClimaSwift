@@ -56,9 +56,7 @@ struct DailyForecastView: View {
                     .scaleEffect(isVisible ? 1 : 0.9)
                     .opacity(isVisible ? 1 : 0)
                     
-                    // Combined Metrics & Hourly Section
                     VStack(alignment: .leading, spacing: 20) {
-                        // Glassmorphism Header
                         HStack {
                             VStack(alignment: .leading) {
                                 Text("DAILY SUMMARY")
@@ -75,7 +73,7 @@ struct DailyForecastView: View {
                                 .foregroundColor(.yellow.opacity(0.8))
                         }
                         .padding()
-                        .background(Color.white.opacity(0.1))
+                        .background(theme.cardBackground)
                         .cornerRadius(20)
                         .padding(.horizontal)
 
@@ -88,7 +86,6 @@ struct DailyForecastView: View {
                         }
                         .padding(.horizontal)
                         
-                        // Hourly Forecast List
                         VStack(alignment: .leading, spacing: 15) {
                             Text("HOURLY FORECAST")
                                 .font(.system(size: 14, weight: .bold))
@@ -107,7 +104,7 @@ struct DailyForecastView: View {
                             }
                             .background(
                                 RoundedRectangle(cornerRadius: 20)
-                                    .fill(Color.white.opacity(0.1))
+                                    .fill(theme.cardBackground)
                             )
                             .padding(.horizontal)
                         }
@@ -120,7 +117,7 @@ struct DailyForecastView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
-        .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbarColorScheme(theme == .evening ? .dark : .light, for: .navigationBar)
         .onAppear {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                 isVisible = true
@@ -231,7 +228,7 @@ private struct CompactMetricTile: View {
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 15)
-                .fill(Color.white.opacity(0.1))
+                .fill(theme.cardBackground)
         )
     }
 }
