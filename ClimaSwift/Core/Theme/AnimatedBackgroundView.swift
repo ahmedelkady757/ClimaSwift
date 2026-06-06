@@ -308,7 +308,7 @@ private struct MoonView: View {
                 
             }
         }
-        .offset(x: screenW * 0.26, y: -screenH * 0.30)
+        .offset(x: screenW * 0.26, y: -screenH * 0.15)
         .onAppear {
             withAnimation(.easeInOut(duration: 4.0).repeatForever(autoreverses: true)) {
                 glowScale = 1.12

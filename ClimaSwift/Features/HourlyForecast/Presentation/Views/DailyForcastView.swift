@@ -73,7 +73,7 @@ struct DailyForecastView: View {
                                 .foregroundColor(.yellow.opacity(0.8))
                         }
                         .padding()
-                        .background(Color.white.opacity(0.1))
+                        .background(theme.cardBackground)
                         .cornerRadius(20)
                         .padding(.horizontal)
 
@@ -104,7 +104,7 @@ struct DailyForecastView: View {
                             }
                             .background(
                                 RoundedRectangle(cornerRadius: 20)
-                                    .fill(Color.white.opacity(0.1))
+                                    .fill(theme.cardBackground)
                             )
                             .padding(.horizontal)
                         }
@@ -228,7 +228,7 @@ private struct CompactMetricTile: View {
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 15)
-                .fill(Color.white.opacity(0.1))
+                .fill(theme.cardBackground)
         )
     }
 }

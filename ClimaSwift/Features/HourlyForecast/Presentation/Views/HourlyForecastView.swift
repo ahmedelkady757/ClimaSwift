@@ -71,7 +71,7 @@ private struct HourlyContentView: View {
                 .padding(.horizontal)
                 .padding(.vertical, 12)
             }
-            .background(Color.white.opacity(0.1))
+            .background(theme.cardBackground)
 
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 0) {

@@ -17,8 +17,8 @@ struct DashboardView: View {
     @State private var localtimeCache: [UUID: String] = [:]
     @State private var themeUpdateTask: Task<Void, Never>? = nil
 
-    private let defaultLat: Double = 30.5500
-    private let defaultLon: Double = 30.9833
+    private let defaultLat: Double = 30.0444
+    private let defaultLon: Double = 31.2357
 
     init() {
         let container = DependencyContainer.shared.container
@@ -35,7 +35,7 @@ struct DashboardView: View {
                      DashboardPageView(
                         lat: defaultLat,
                         lon: defaultLon,
-                        locationName: "Menofia",
+                        locationName: "Cairo",
                         globalTheme: themeEngine.currentTheme,
                         onLocaltimeLoaded: { localtime in
                             themeEngine.updateTheme(for: localtime)
@@ -116,11 +116,22 @@ struct DashboardView: View {
                         }
                     } else {
                         Button {
+                            Task {
+                                let cairo = LocationDomainModel(
+                                    name: "Cairo",
+                                    region: "Cairo Governorate",
+                                    country: "Egypt",
+                                    latitude: defaultLat,
+                                    longitude: defaultLon,
+                                    isSaved: true
+                                )
+                                await savedLocationsVM.saveLocation(cairo)
+                                // selectedLocationId updates via onReceive
+                            }
                         } label: {
                             Image(systemName: "star")
-                                .foregroundColor(themeEngine.currentTheme.foregroundColor.opacity(0.5))
+                                .foregroundColor(themeEngine.currentTheme.foregroundColor)
                         }
-                        .disabled(true)
                     }
                 }
             }
