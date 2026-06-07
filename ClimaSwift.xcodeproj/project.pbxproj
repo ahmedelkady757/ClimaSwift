@@ -6,6 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		BE9749362FCF041500781B58 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = BE9749352FCF041500781B58 /* Lottie */; };
+		BECF278D2FCDD95A004980A1 /* Swinject in Frameworks */ = {isa = PBXBuildFile; productRef = BECF278C2FCDD95A004980A1 /* Swinject */; };
+		BECF27902FCDD96B004980A1 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = BECF278F2FCDD96B004980A1 /* Alamofire */; };
+		BECF27CE2FCDDAE1004980A1 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = BECF27CD2FCDDAE1004980A1 /* SDWebImageSwiftUI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		BECF275E2FCDC908004980A1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -29,9 +36,22 @@
 		BECF27672FCDC908004980A1 /* ClimaSwiftUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClimaSwiftUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		BED51C562FD074F8009D9260 /* Exceptions for "ClimaSwift" folder in "ClimaSwift" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = BECF274D2FCDC905004980A1 /* ClimaSwift */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		BECF27502FCDC905004980A1 /* ClimaSwift */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				BED51C562FD074F8009D9260 /* Exceptions for "ClimaSwift" folder in "ClimaSwift" target */,
+			);
 			path = ClimaSwift;
 			sourceTree = "<group>";
 		};
@@ -52,6 +72,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BECF27CE2FCDDAE1004980A1 /* SDWebImageSwiftUI in Frameworks */,
+				BECF278D2FCDD95A004980A1 /* Swinject in Frameworks */,
+				BECF27902FCDD96B004980A1 /* Alamofire in Frameworks */,
+				BE9749362FCF041500781B58 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +136,10 @@
 			);
 			name = ClimaSwift;
 			packageProductDependencies = (
+				BECF278C2FCDD95A004980A1 /* Swinject */,
+				BECF278F2FCDD96B004980A1 /* Alamofire */,
+				BECF27CD2FCDDAE1004980A1 /* SDWebImageSwiftUI */,
+				BE9749352FCF041500781B58 /* Lottie */,
 			);
 			productName = ClimaSwift;
 			productReference = BECF274E2FCDC905004980A1 /* ClimaSwift.app */;
@@ -195,6 +223,12 @@
 			);
 			mainGroup = BECF27452FCDC905004980A1;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				BECF278B2FCDD95A004980A1 /* XCRemoteSwiftPackageReference "Swinject" */,
+				BECF278E2FCDD96B004980A1 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				BECF27CC2FCDDAE1004980A1 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+				BE9749342FCF041500781B58 /* XCRemoteSwiftPackageReference "lottie-ios" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = BECF274F2FCDC905004980A1 /* Products */;
 			projectDirPath = "";
@@ -397,9 +431,9 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ClimaSwift/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -424,9 +458,9 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ClimaSwift/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -550,6 +584,64 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BE9749342FCF041500781B58 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-ios.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.6.0;
+			};
+		};
+		BECF278B2FCDD95A004980A1 /* XCRemoteSwiftPackageReference "Swinject" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Swinject/Swinject";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.10.0;
+			};
+		};
+		BECF278E2FCDD96B004980A1 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.12.0;
+			};
+		};
+		BECF27CC2FCDDAE1004980A1 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.4;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BE9749352FCF041500781B58 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BE9749342FCF041500781B58 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
+		};
+		BECF278C2FCDD95A004980A1 /* Swinject */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BECF278B2FCDD95A004980A1 /* XCRemoteSwiftPackageReference "Swinject" */;
+			productName = Swinject;
+		};
+		BECF278F2FCDD96B004980A1 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BECF278E2FCDD96B004980A1 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+		BECF27CD2FCDDAE1004980A1 /* SDWebImageSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BECF27CC2FCDDAE1004980A1 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
+			productName = SDWebImageSwiftUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = BECF27462FCDC905004980A1 /* Project object */;
 }
