@@ -16,6 +16,7 @@ struct DashboardView: View {
     @State private var selectedLocationId: UUID?
     @State private var localtimeCache: [UUID: String] = [:]
     @State private var themeUpdateTask: Task<Void, Never>? = nil
+    @State private var isShowingDeleteAlert = false
 
     private let defaultLat: Double = 30.0444
     private let defaultLon: Double = 31.2357
@@ -106,9 +107,7 @@ struct DashboardView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if !savedLocationsVM.savedLocations.isEmpty, let currentId = selectedLocationId {
                         Button {
-                            Task {
-                                await savedLocationsVM.deleteLocation(byId: currentId)
-                            }
+                            isShowingDeleteAlert = true
                         } label: {
                             Image(systemName: "star.fill")
                                 .foregroundColor(.blue)
@@ -136,6 +135,19 @@ struct DashboardView: View {
                 }
             }
             .toolbarBackground(.hidden, for: .navigationBar)
+            .alert("Remove City", isPresented: $isShowingDeleteAlert) {
+                Button(role: .destructive) {
+                    if let currentId = selectedLocationId {
+                        Task { await savedLocationsVM.deleteLocation(byId: currentId) }
+                    }
+                } label: {
+                    Text("Delete")
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                let cityName = savedLocationsVM.savedLocations.first(where: { $0.id == selectedLocationId })?.name ?? "this city"
+                Text("Are you sure you want to remove \(cityName) from your favorites?")
+            }
             .sheet(isPresented: $isShowingLocations, onDismiss: {
                 Task {
                     await savedLocationsVM.fetchSavedLocations()
