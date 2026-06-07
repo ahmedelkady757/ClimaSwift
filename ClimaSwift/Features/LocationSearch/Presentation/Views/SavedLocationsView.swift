@@ -4,6 +4,8 @@ struct SavedLocationsView: View {
     @StateObject private var viewModel: SavedLocationsViewModel
     @StateObject private var themeEngine: DynamicThemeEngine
     @State private var isShowingSearch = false
+    @State private var locationToDelete: LocationDomainModel? = nil
+    @State private var isShowingDeleteAlert = false
     @Environment(\.dismiss) private var dismiss
     
     var onLocationSelected: ((Double, Double) -> Void)?
@@ -46,7 +48,8 @@ struct SavedLocationsView: View {
                         LazyVStack(spacing: 16) {
                             ForEach(viewModel.savedLocations) { location in
                                 SavedLocationCard(location: location, theme: themeEngine.currentTheme) {
-                                    Task { await viewModel.deleteLocation(byId: location.id) }
+                                    locationToDelete = location
+                                    isShowingDeleteAlert = true
                                 } onTap: {
                                     onLocationSelected?(location.latitude, location.longitude)
                                     dismiss()
@@ -87,6 +90,16 @@ struct SavedLocationsView: View {
             }
             .task {
                 await viewModel.fetchSavedLocations()
+            }
+            .alert("Remove City", isPresented: $isShowingDeleteAlert, presenting: locationToDelete) { location in
+                Button(role: .destructive) {
+                    Task { await viewModel.deleteLocation(byId: location.id) }
+                } label: {
+                    Text("Delete")
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: { location in
+                Text("Are you sure you want to remove \(location.name) from your favorites?")
             }
         }
     }
