@@ -42,6 +42,7 @@ struct ClimaSwiftApp: App {
                     showSplash = false
                 }
             }
+            .environmentObject(NetworkMonitor.shared)
         }
         .modelContainer(sharedModelContainer)
     }
