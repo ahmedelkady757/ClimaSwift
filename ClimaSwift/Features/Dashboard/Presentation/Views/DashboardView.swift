@@ -11,12 +11,14 @@ import SDWebImageSwiftUI
 struct DashboardView: View {
     @StateObject private var themeEngine: DynamicThemeEngine
     @StateObject private var savedLocationsVM: SavedLocationsViewModel
+    @EnvironmentObject private var networkMonitor: NetworkMonitor
 
     @State private var isShowingLocations = false
     @State private var selectedLocationId: UUID?
     @State private var localtimeCache: [UUID: String] = [:]
     @State private var themeUpdateTask: Task<Void, Never>? = nil
     @State private var isShowingDeleteAlert = false
+    @State private var showOfflineAlert = false
 
     private let defaultLat: Double = 30.0444
     private let defaultLon: Double = 31.2357
@@ -80,6 +82,9 @@ struct DashboardView: View {
                         }
                     }
                 }
+
+                // Offline banner — always on top, never blocks touches
+                OfflineBannerView(isOffline: !networkMonitor.isConnected)
             }
             .task {
                 await savedLocationsVM.fetchSavedLocations()
@@ -102,6 +107,8 @@ struct DashboardView: View {
                         Image(systemName: "list.bullet")
                             .foregroundColor(themeEngine.currentTheme.foregroundColor)
                     }
+                    // Saved-locations list is still reachable offline;
+                    // only the Search button inside it is blocked.
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -135,6 +142,11 @@ struct DashboardView: View {
                 }
             }
             .toolbarBackground(.hidden, for: .navigationBar)
+            .alert("No Internet Connection", isPresented: $showOfflineAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("This feature is unavailable while offline. Please check your connection and try again.")
+            }
             .alert("Remove City", isPresented: $isShowingDeleteAlert) {
                 Button(role: .destructive) {
                     if let currentId = selectedLocationId {
@@ -236,6 +248,9 @@ private struct WeatherContentView: View {
     let lon: Double
     let locationName: String?
 
+    @EnvironmentObject private var networkMonitor: NetworkMonitor
+    @State private var showOfflineAlert = false
+
     var body: some View {
         VStack(spacing: 20) {
             VStack(spacing: 8) {
@@ -272,6 +287,11 @@ private struct WeatherContentView: View {
                         .font(.caption)
                         .fontWeight(.bold)
                     Spacer()
+                    if !networkMonitor.isConnected {
+                        Label("Offline", systemImage: "wifi.slash")
+                            .font(.caption2)
+                            .foregroundColor(theme.foregroundColor.opacity(0.6))
+                    }
                 }
                 .padding(.horizontal)
                 .foregroundColor(theme.foregroundColor.opacity(0.7))
@@ -280,8 +300,17 @@ private struct WeatherContentView: View {
                     .background(theme.foregroundColor.opacity(0.3))
 
                 ForEach(forecast) { day in
-                    NavigationLink(destination: DailyForecastView(day: day, theme: theme)) {
-                        ForecastRowView(day: day, theme: theme)
+                    if networkMonitor.isConnected {
+                        NavigationLink(destination: DailyForecastView(day: day, theme: theme)) {
+                            ForecastRowView(day: day, theme: theme, isOffline: false)
+                        }
+                    } else {
+                        Button {
+                            showOfflineAlert = true
+                        } label: {
+                            ForecastRowView(day: day, theme: theme, isOffline: true)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
             }
@@ -290,6 +319,11 @@ private struct WeatherContentView: View {
             .cornerRadius(15)
             .foregroundColor(theme.foregroundColor)
             .padding(.horizontal)
+            .alert("No Internet Connection", isPresented: $showOfflineAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("Daily forecast details are unavailable while offline. Please check your connection and try again.")
+            }
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
                 MetricTile(title: "VISIBILITY", value: "\(Int(weather.visibility)) km", theme: theme)
@@ -305,6 +339,7 @@ private struct WeatherContentView: View {
 private struct ForecastRowView: View {
     let day: ForecastDayModel
     let theme: ThemeType
+    let isOffline: Bool
 
     var body: some View {
         HStack {
@@ -324,8 +359,16 @@ private struct ForecastRowView: View {
             Spacer()
 
             Text("\(Int(day.minTemp))° - \(Int(day.maxTemp))°")
+
+            if isOffline {
+                Image(systemName: "lock.fill")
+                    .font(.caption)
+                    .foregroundColor(theme.foregroundColor.opacity(0.45))
+                    .padding(.leading, 6)
+            }
         }
         .padding(.horizontal)
+        .opacity(isOffline ? 0.6 : 1.0)
     }
 
     private var formattedDay: String {

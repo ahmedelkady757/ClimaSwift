@@ -3,9 +3,11 @@ import SwiftUI
 struct SavedLocationsView: View {
     @StateObject private var viewModel: SavedLocationsViewModel
     @StateObject private var themeEngine: DynamicThemeEngine
+    @EnvironmentObject private var networkMonitor: NetworkMonitor
     @State private var isShowingSearch = false
     @State private var locationToDelete: LocationDomainModel? = nil
     @State private var isShowingDeleteAlert = false
+    @State private var showOfflineSearchAlert = false
     @Environment(\.dismiss) private var dismiss
     
     var onLocationSelected: ((Double, Double) -> Void)?
@@ -67,11 +69,19 @@ struct SavedLocationsView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
-                        isShowingSearch = true
+                        if networkMonitor.isConnected {
+                            isShowingSearch = true
+                        } else {
+                            showOfflineSearchAlert = true
+                        }
                     } label: {
-                        Image(systemName: "magnifyingglass")
+                        Image(systemName: networkMonitor.isConnected ? "magnifyingglass" : "magnifyingglass.circle.fill")
                             .fontWeight(.semibold)
-                            .foregroundColor(themeEngine.currentTheme.foregroundColor)
+                            .foregroundColor(
+                                networkMonitor.isConnected
+                                    ? themeEngine.currentTheme.foregroundColor
+                                    : themeEngine.currentTheme.foregroundColor.opacity(0.4)
+                            )
                     }
                 }
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -87,6 +97,11 @@ struct SavedLocationsView: View {
                 }
             }) {
                 SearchView()
+            }
+            .alert("Search Unavailable Offline", isPresented: $showOfflineSearchAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("Searching for new locations requires an internet connection. Please check your network settings and try again.")
             }
             .task {
                 await viewModel.fetchSavedLocations()
